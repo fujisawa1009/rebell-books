@@ -1,0 +1,34 @@
+---
+interface Link {
+  kind: "audible" | "kindle-unlimited" | "amazon" | "rakuten" | "asp";
+  label: string;
+  url: string;
+  note?: string;
+}
+interface Props {
+  links: Link[];
+}
+const { links } = Astro.props;
+---
+
+{
+  links.length > 0 && (
+    <section class="affiliate-box">
+      <h2>この本を読む / 聴く</h2>
+      <ul>
+        {links.map((l) => (
+          <li>
+            {/* アフィリリンクは rel="sponsored nofollow" が必須（Google のガイドライン） */}
+            <a href={l.url} rel="sponsored nofollow noopener" target="_blank">
+              {l.label}
+            </a>
+            {l.note && <span class="note"> — {l.note}</span>}
+          </li>
+        ))}
+      </ul>
+      <p class="pr-inline">
+        ※ 上記は広告リンクです（PR）。価格・在庫は変動します。
+      </p>
+    </section>
+  )
+}

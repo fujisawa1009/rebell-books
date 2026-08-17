@@ -1,0 +1,95 @@
+---
+import Base from "./Base.astro";
+import PrDisclosure from "../components/PrDisclosure.astro";
+import AffiliateBox from "../components/AffiliateBox.astro";
+import { SITE_OWNER } from "../consts";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"posts">;
+}
+const { post } = Astro.props;
+const { title, description, date, updated, tags, canonical, affiliate, book, isbn } =
+  post.data;
+
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Tokyo",
+  }).format(d);
+
+const url = new URL(`/posts/${post.id}`, Astro.site).href;
+const canonicalURL = canonical ?? url;
+// 別サイトを canonical にしている＝この記事は「写し」。検索評価を渡す
+const isSyndicated = !!canonical && canonical !== url;
+
+// 構造化データ（Google に書評として認識させる）
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Review",
+  headline: title,
+  datePublished: date.toISOString(),
+  ...(updated ? { dateModified: updated.toISOString() } : {}),
+  author: { "@type": "Organization", name: SITE_OWNER },
+  publisher: { "@type": "Organization", name: SITE_OWNER },
+  mainEntityOfPage: canonicalURL,
+  itemReviewed: {
+    "@type": "Book",
+    name: book?.title ?? title,
+    ...(book?.author ? { author: { "@type": "Person", name: book.author } } : {}),
+    ...(book?.publisher ? { publisher: book.publisher } : {}),
+    ...(isbn ? { isbn } : {}),
+  },
+};
+---
+
+<Base
+  title={title}
+  description={description}
+  canonical={canonicalURL}
+  ogType="article"
+>
+  <script
+    slot="head"
+    type="application/ld+json"
+    set:html={JSON.stringify(jsonLd)}
+  />
+
+  <article>
+    <h1>{title}</h1>
+    <div class="meta">
+      <time datetime={date.toISOString()}>{fmt(date)}</time>
+      {updated && <span>更新 {fmt(updated)}</span>}
+      {tags.map((t) => <a class="tag" href={`/tags/${t}`}>#{t}</a>)}
+    </div>
+
+    {/* アフィリリンクがある記事は、冒頭に必ず PR表記を出す（ステマ規制） */}
+    {affiliate.length > 0 && <PrDisclosure />}
+
+    {
+      isSyndicated && (
+        <p class="meta">
+          この記事の原典は <a href={canonicalURL}>{canonicalURL}</a> です。
+        </p>
+      )
+    }
+
+    {
+      book && (
+        <p class="meta">
+          対象書籍: <strong>{book.title}</strong>
+          {book.author && <span>／{book.author}</span>}
+          {book.publisher && <span>／{book.publisher}</span>}
+        </p>
+      )
+    }
+
+    <slot />
+
+    <AffiliateBox links={affiliate} />
+  </article>
+
+  <p style="margin-top:32px"><a href="/">&larr; 書評一覧へ</a></p>
+</Base>

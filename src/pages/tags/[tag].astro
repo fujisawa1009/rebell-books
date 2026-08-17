@@ -1,0 +1,49 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getCollection("posts", ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+    },
+  }));
+};
+
+const { tag, posts } = Astro.props;
+
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Tokyo",
+  }).format(d);
+---
+
+<Base title={`#${tag} の書評`} description={`タグ「${tag}」がついた書評の一覧。`}>
+  <h1 style="font-size:1.4rem">#{tag}</h1>
+  <ul class="post-list">
+    {
+      posts.map((p) => (
+        <li>
+          <h2>
+            <a href={`/posts/${p.id}`}>{p.data.title}</a>
+          </h2>
+          <div class="meta">
+            <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+          </div>
+          <p>{p.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+  <p style="margin-top:32px"><a href="/tags">&larr; タグ一覧へ</a></p>
+</Base>

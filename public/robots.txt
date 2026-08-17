@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://wwwrebell.com/sitemap-index.xml

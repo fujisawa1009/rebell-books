@@ -1,0 +1,83 @@
+---
+import { SITE_TITLE, SITE_DESCRIPTION, SITE_OWNER, NAV } from "../consts";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** frontmatter で指定された canonical。無ければ現在URLを canonical にする */
+  canonical?: string;
+  /** 記事ページなら "article" */
+  ogType?: "website" | "article";
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE_DESCRIPTION,
+  canonical,
+  ogType = "website",
+  noindex = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${SITE_TITLE}` : SITE_TITLE;
+
+/**
+ * canonical: frontmatter 優先 → 無ければ site + パスから自動生成。
+ * build.format:"file" だと pathname が "/index.html" "/tags.html" になるので、
+ * 実際に配信されるURL（Cloudflare Pages は .html を落として配信する）に正規化する。
+ * ここを間違えると /index.html が正規URLになり、SEO上まずい。
+ */
+const cleanPath =
+  Astro.url.pathname.replace(/(?:index)?\.html$/, "").replace(/\/$/, "") || "/";
+const canonicalURL = canonical ?? new URL(cleanPath, Astro.site).href;
+const year = new Date().getFullYear();
+---
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content={SITE_TITLE} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="site-title" href="/">{SITE_TITLE}</a>
+        <nav class="site-nav">
+          {NAV.map((n) => <a href={n.href}>{n.label}</a>)}
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>
+          当サイトはアフィリエイトプログラムに参加しており、記事内に広告リンクを含む場合があります。
+          該当する記事には冒頭に「PR」と表示しています。
+        </p>
+        <p>
+          <a href="/about">運営者情報</a> ・
+          <a href="/privacy">プライバシーポリシー</a>
+        </p>
+        <p>&copy; {year} {SITE_OWNER}</p>
+      </div>
+    </footer>
+  </body>
+</html>

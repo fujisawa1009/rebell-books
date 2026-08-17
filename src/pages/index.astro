@@ -1,0 +1,47 @@
+---
+import Base from "../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { SITE_DESCRIPTION } from "../consts";
+
+const posts = (await getCollection("posts", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const fmt = (d: Date) =>
+  new Intl.DateTimeFormat("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: "Asia/Tokyo",
+  }).format(d);
+---
+
+<Base>
+  <section>
+    <h1 style="font-size:1.4rem">書評</h1>
+    <p style="color:var(--fg-muted); font-size:0.9rem">{SITE_DESCRIPTION}</p>
+  </section>
+
+  {posts.length === 0 && <p>まだ記事がありません。</p>}
+
+  <ul class="post-list">
+    {
+      posts.map((p) => (
+        <li>
+          <h2>
+            <a href={`/posts/${p.id}`}>{p.data.title}</a>
+          </h2>
+          <div class="meta">
+            <time datetime={p.data.date.toISOString()}>{fmt(p.data.date)}</time>
+            {p.data.tags.map((t) => (
+              <a class="tag" href={`/tags/${t}`}>
+                #{t}
+              </a>
+            ))}
+          </div>
+          <p>{p.data.description}</p>
+        </li>
+      ))
+    }
+  </ul>
+</Base>
