@@ -88,8 +88,9 @@ publishing.md §7-3 / T-223 の申し送り事項。CEO確認（2026-08-18／202
 |---|---|---|---|---|
 | 2-1 | `lib/rebell-books-runner.js` 新設（`infra.runClaude()`を呼び、skill `write-book-review.md` の手順でGit操作なしの下書き生成のみ行う） | AI | ✅ | 本タスクで作成 |
 | 2-2 | `scripts/rebell-books-nightly.sh` 新設（楽天キー未設定・PAUSED は$0コストで早期終了する前段チェック→ランナー起動） | AI | ✅ | research-nightly.shと同じ「安いチェックを先に」の思想 |
-| 2-3 | `.company/jobs/registry.yml` に `rebell-books-draft` を追加（`type:ai` / `safety.external:false` / `schedule.kind:cron`） | AI | 🟡 | 生成→ローカル保存のみでgit操作をしないため`external:false`が正しい（R0と矛盾しない） |
-| 2-4 | 1本を試験的に生成し、`content/posts/*.md`（draft:true）＋`.company/approval-queue.md`登録まで人手なしで到達するか確認 | AI | ⛔ | 2-1〜2-3完了後。楽天アプリID未発行の間はここで意図的にスキップされる（想定挙動） |
+| 2-3 | `.company/jobs/registry.yml` に `rebell-books-draft` を追加（`type:ai` / `safety.external:false` / `schedule.kind:cron`） | AI | ✅ | 生成→ローカル保存のみでgit操作をしないため`external:false`が正しい（R0と矛盾しない）。台帳検証テスト(test/job-registry.test.js)通過済み |
+| 2-4 | 1本を試験的に生成し、`content/posts/*.md`（draft:true）＋`.company/approval-queue.md`登録まで人手なしで到達するか確認 | AI | 🟡 | 配線自体は`node scripts/job-run.js run rebell-books-draft`で実地確認済み（楽天キー未発行のため意図通り$0スキップ）。**実際に記事1本が承認キューまで到達する確認は、楽天キー発行後に残る** |
+| 2-5 | `scripts/launchd/com.rebell.rebell-books-draft.plist` 新設（毎日03:30起動。楽天キー未発行の間も安全に読み込める設計） | AI | ✅ | 他ジョブと同じ「準備のみ・有効化はCEOの最終GO待ち」方式（`plutil -lint`で構文検証済み）。有効化手順はplist内コメント参照 |
 
 **DoD**: 夜間cronが `content/posts/*.md`（`draft:true`）を書き、承認キューに登録するところまで、
 人の手を介さず・git操作を一切せずに到達する。
