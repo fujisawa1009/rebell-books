@@ -9,8 +9,19 @@ interface Props {
   post: CollectionEntry<"posts">;
 }
 const { post } = Astro.props;
-const { title, description, date, updated, tags, canonical, affiliate, book, isbn } =
-  post.data;
+const {
+  title,
+  description,
+  date,
+  updated,
+  tags,
+  canonical,
+  affiliate,
+  book,
+  isbn,
+  coverImage,
+  coverImageCredit,
+} = post.data;
 
 const fmt = (d: Date) =>
   new Intl.DateTimeFormat("ja-JP", {
@@ -83,6 +94,15 @@ const jsonLd = {
           {book.author && <span>／{book.author}</span>}
           {book.publisher && <span>／{book.publisher}</span>}
         </p>
+      )
+    }
+
+    {
+      coverImage && (
+        <figure class="cover-figure">
+          <img src={coverImage} alt={`『${book?.title ?? title}』の書影`} loading="lazy" />
+          <figcaption>書影出典: {coverImageCredit ?? "openBD"}</figcaption>
+        </figure>
       )
     }
 

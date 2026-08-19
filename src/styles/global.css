@@ -160,6 +160,22 @@ article img {
   max-width: 100%;
   height: auto;
 }
+.cover-figure {
+  margin: 20px 0 28px;
+  text-align: center;
+}
+.cover-figure img {
+  max-width: 240px;
+  max-height: 340px;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.cover-figure figcaption {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
 article pre {
   padding: 14px 16px;
   border-radius: 6px;

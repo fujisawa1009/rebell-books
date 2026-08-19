@@ -50,6 +50,15 @@ const posts = defineCollection({
     /** true の記事はビルド対象から外れる（下書き） */
     draft: z.boolean().default(false),
     /**
+     * 書影URL（任意）。openBDの`summary.cover`等、権利者が公式に提供する画像のみを指す
+     * （自前でスクリーンショットを撮って掲載しない＝著作権配慮）。ホットリンクで参照し、
+     * 自サイトに複製・保存しない。openBDのcover提供率は低いため、無い記事の方が多い想定。
+     */
+    coverImage: z.string().url().optional(),
+    /** 書影の出典表記（例: "openBD"）。coverImageがある場合は必須にしたいが、
+     *  移行期の互換のため任意にしておく */
+    coverImageCredit: z.string().optional(),
+    /**
      * 記事の要点（3〜6個）。サイト表示には使わない。将来の別媒体展開
      * （例: 要約をスライド化してTikTok等に横展開）向けの構造化データとして
      * 記事生成時に併せて残しておく（CEO意向 2026-08-20）。空でもビルドは通る。
