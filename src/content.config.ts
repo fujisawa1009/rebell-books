@@ -49,6 +49,12 @@ const posts = defineCollection({
       .default([]),
     /** true の記事はビルド対象から外れる（下書き） */
     draft: z.boolean().default(false),
+    /**
+     * 記事の要点（3〜6個）。サイト表示には使わない。将来の別媒体展開
+     * （例: 要約をスライド化してTikTok等に横展開）向けの構造化データとして
+     * 記事生成時に併せて残しておく（CEO意向 2026-08-20）。空でもビルドは通る。
+     */
+    keyPoints: z.array(z.string()).max(6).optional(),
   }),
 });
 
